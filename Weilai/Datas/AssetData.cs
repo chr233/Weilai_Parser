@@ -1,14 +1,14 @@
 namespace Weilai.Datas;
 public sealed record AssetData
 {
-    public EAssetType Type { get; set; }
-    public string Name { get; set; }
-    public long Count { get; set; }
+    public string Name { get; init; }
+    public EAssetType Type { get; init; }
 
-    public AssetData(EAssetType type, string name, long count)
+    public Dictionary<string, long> CountInfo { get; } = [];
+
+    public AssetData(string name, EAssetType type)
     {
-        Type = type;
         Name = name;
-        Count = count;
+        Type = type;
     }
 }

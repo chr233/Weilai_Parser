@@ -2,6 +2,7 @@ namespace Weilai.Datas;
 
 public enum EAssetType : byte
 {
+    None = 0,
     CG,
     /// <summary>
     /// 场景
@@ -19,6 +20,9 @@ public enum EAssetType : byte
     /// 立绘
     /// </summary>
     Spire,
-
-    None,
+    /// <summary>
+    /// 配音
+    /// </summary>
+    Voice,
+    Other,
 }
