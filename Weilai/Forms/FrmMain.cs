@@ -10,8 +10,6 @@ public partial class FrmMain : Form
 {
     private readonly FrmMainViewModel context;
 
-
-
     public FrmMain()
     {
         InitializeComponent();
@@ -21,8 +19,12 @@ public partial class FrmMain : Form
 
         Text = $"转换工具 By chr_ {BuildInfo.Copyright} Ver {BuildInfo.Version} {BuildInfo.Configuration}";
 
+#if DEBUG
         context.FileList.Add(new FileInfoData("人物大全.docx", "C:\\Users\\chr11\\Downloads\\人物大全.docx"));
         context.FileList.Add(new FileInfoData("demo.docx", "C:\\Users\\chr11\\Downloads\\demo.docx"));
+#endif
+
+        tabControl1.TabIndex = 0;
     }
 
     private void BindControls()
@@ -74,6 +76,10 @@ public partial class FrmMain : Form
         lvCharacter.BeginUpdate();
         lvCharacter.Items.Clear();
 
+        lvDialog.BeginUpdate();
+        lvDialog.Items.Clear();
+
+
         foreach (var character in context.CharacterList.Items)
         {
             long wordCount = 0;
@@ -86,19 +92,19 @@ public partial class FrmMain : Form
                 var countInfo = character.CountInfo;
 
                 wordCount = countInfo.Values.Sum(static x => x.WordCount);
-                wordCount = countInfo.Values.Sum(static x => x.RawWordCount);
-                wordCount = countInfo.Values.Sum(static x => x.LineCount);
-                wordCount = countInfo.Values.Sum(static x => x.RawLineCount);
+                rawWordCount = countInfo.Values.Sum(static x => x.RawWordCount);
+                lineCount = countInfo.Values.Sum(static x => x.LineCount);
+                rawLineCount = countInfo.Values.Sum(static x => x.RawLineCount);
             }
             else if (character.CountInfo.TryGetValue(context.SelectedFile, out var countInfo))
             {
                 wordCount = countInfo.WordCount;
-                wordCount = countInfo.RawWordCount;
-                wordCount = countInfo.LineCount;
-                wordCount = countInfo.RawLineCount;
+                rawWordCount = countInfo.RawWordCount;
+                lineCount = countInfo.LineCount;
+                rawLineCount = countInfo.RawLineCount;
             }
 
-            if (wordCount + lineCount > 0)
+            if (!context.HiddenZero || wordCount + lineCount > 0)
             {
                 var item = new ListViewItem {
                     Text = character.FullName,
@@ -113,8 +119,42 @@ public partial class FrmMain : Form
 
                 lvCharacter.Items.Add(item);
             }
+
+            List<CharacterDialogData> dialogs = [];
+            if (string.IsNullOrEmpty(context.SelectedFile))
+            {
+                foreach (var countInfo in character.CountInfo.Values)
+                {
+                    dialogs.AddRange(countInfo.Dialogs);
+                }
+            }
+            else
+            {
+                if (character.CountInfo.TryGetValue(context.SelectedFile, out var countInfo))
+                {
+                    dialogs.AddRange(countInfo.Dialogs);
+                }
+            }
+
+            foreach (var dialog in dialogs)
+            {
+                var item = new ListViewItem {
+                    Text = character.FullName,
+                    SubItems = {
+                        character.PinYinName,
+                        dialog.LineId.ToString(),
+                        dialog.Content,
+                        dialog.RawContent,
+                    },
+                };
+
+                lvDialog.Items.Add(item);
+            }
+
         }
+
         lvCharacter.EndUpdate();
+        lvDialog.EndUpdate();
     }
 
     private void OnAssetListChange(IChangeSet<AssetData> e)
@@ -153,8 +193,10 @@ public partial class FrmMain : Form
     private void BtnSelectFile_Click(object sender, EventArgs e)
     {
         using var dialog = new OpenFileDialog {
+            CheckPathExists = true,
             Filter = "受支持的文件 (*.docx;*.txt;*.rtf)|*.docs;*.rtf;*.txt|所有文件 (*.*)|*.*",
             Multiselect = true,
+            AutoUpgradeEnabled = true,
         };
 
         if (dialog.ShowDialog() == DialogResult.OK && dialog.FileNames.Length > 0)
@@ -172,6 +214,22 @@ public partial class FrmMain : Form
                     }
                 }
             });
+        }
+    }
+
+    private async void BtnExport_Click(object sender, EventArgs e)
+    {
+        using var dialog = new FolderBrowserDialog {
+            ShowNewFolderButton = true,
+            AutoUpgradeEnabled = true,
+        };
+
+        if (dialog.ShowDialog() == DialogResult.OK)
+        {
+            var path = dialog.SelectedPath;
+
+            await Utils.ExportSummary(path, context.SelectedFile, context.CharacterList.Items, context.AssetList.Items).ConfigureAwait(false);
+            await Utils.ExportDetail(path, context.SelectedFile, context.CharacterList.Items, context.AssetList.Items).ConfigureAwait(false);
         }
     }
 
@@ -208,6 +266,14 @@ public partial class FrmMain : Form
         }
     }
 
+    private void CbHiddenZero_CheckedChanged(object sender, EventArgs e)
+    {
+        context.HiddenZero = cbHiddenZero.Checked;
+
+        OnCharacterListChange(new ChangeSet<CharacterData>());
+        OnAssetListChange(new ChangeSet<AssetData>());
+    }
+
     private void CbFileFilter_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (cbFileFilter.SelectedIndex > 0)
@@ -218,6 +284,9 @@ public partial class FrmMain : Form
         {
             context.SelectedFile = null;
         }
+
+        OnCharacterListChange(new ChangeSet<CharacterData>());
+        OnAssetListChange(new ChangeSet<AssetData>());
     }
 
     private async void BtnParse_Click(object sender, EventArgs e)
@@ -306,46 +375,35 @@ public partial class FrmMain : Form
 
         var regexRawString = RegexUtils.MatchRawString();
 
-        //扫描剧本, 添加角色和资源, 资源计数
+        //第一遍扫描剧本, 添加角色和资源
         foreach (var line in lines)
         {
-            var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var trimedStart = line.Trim();
 
-            if (parts.Length == 0)
+            if (string.IsNullOrEmpty(trimedStart) || (!trimedStart.Contains('#') && !trimedStart.Contains('@')))
             {
                 continue;
             }
 
-            string? name = null;
-            foreach (var part in parts)
-            {
-                var rawName = part.ToUpperInvariant();
-                if (rawName.StartsWith('"'))
-                {
-                    break;
-                }
+            trimedStart = trimedStart[1..].Trim();
 
-                var pureName = regexRawString.Replace(rawName, "");
-                if (!string.IsNullOrEmpty(pureName) && pureName.Length <= 5)
-                {
-                    name = pureName;
-                    break;
-                }
-            }
+            var temp = trimedStart.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+            var keyword = temp.FirstOrDefault("");
 
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(keyword))
             {
                 continue;
             }
 
-            var assetType = Utils.GetAssetType(name);
+            var assetType = Utils.GetAssetType(keyword);
 
             if (assetType != EAssetType.None)
             {
-                if (!assetDict.TryGetValue(name, out var assetInfo))
+                //判断为资源
+                if (!assetDict.TryGetValue(trimedStart, out var assetInfo))
                 {
-                    assetInfo = new AssetData(name, assetType);
-                    assetDict.Add(name, assetInfo);
+                    assetInfo = new AssetData(trimedStart, assetType);
+                    assetDict.Add(trimedStart, assetInfo);
                 }
 
                 if (!assetInfo.CountInfo.TryGetValue(fileName, out var countInfo))
@@ -357,7 +415,16 @@ public partial class FrmMain : Form
             }
             else
             {
-                if (name.StartsWith('"'))
+                //判断为角色
+                var parts = line[1..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length == 0)
+                {
+                    continue;
+                }
+
+                var name = parts[0];
+                if (name.Length == 0 || name.Length > 6)
                 {
                     continue;
                 }
@@ -373,99 +440,86 @@ public partial class FrmMain : Form
                     !characterPyDict.TryGetValue(pinyin, out character))
                 {
                     character = new CharacterData(name, pinyin);
+
                     characterNameDict.TryAdd(name, character);
                     characterPyDict.TryAdd(pinyin, character);
+                }
+
+                character.CountInfo.TryAdd(fileName, new CountInfoData());
+
+                for (var i = 1; i < parts.Length; i++)
+                {
+                    var part = parts[i];
+                    if (part.StartsWith('"'))
+                    {
+                        break;
+                    }
+
+                    character.Emojis.Add(part);
                 }
             }
         }
 
-        //记录台词
-        foreach (var line in lines)
+        //解析台词
+        for (var lineId = 0; lineId < lines.Length; lineId++)
         {
-            var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var line = lines[lineId];
+            var parts = line.Trim().Split('"', 2, StringSplitOptions.RemoveEmptyEntries);
+
             if (parts.Length < 2)
             {
                 continue;
             }
 
-            List<string> names = [];
-            string? say = null;
+            var strNames = parts[0].ToUpperInvariant();
+            var names = strNames.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            for (int i = 0; i < parts.Length; i++)
+            List<CharacterData> charactersList = [];
+            foreach (var name in names)
             {
-                var part = parts[i];
-
-                if (part.StartsWith('"'))
+                if (characterNameDict.TryGetValue(name, out var character) ||
+                    characterPyDict.TryGetValue(name, out character))
                 {
-                    say = string.Join(' ', parts[i..]);
-                    break;
-                }
-                else
-                {
-                    var pureName = regexRawString.Replace(part, "");
-                    if (!string.IsNullOrEmpty(pureName) && pureName.Length <= 5)
-                    {
-                        names.Add(pureName);
-                    }
+                    charactersList.Add(character);
                 }
             }
 
-            if (string.IsNullOrEmpty(say))
+            if (charactersList.Count == 0)
             {
                 continue;
             }
 
+            var say = parts[1];
+            if (say.EndsWith('"'))
+            {
+                say = say[..^1];
+            }
 
+            var rawSay = regexRawString.Replace(say, "");
 
-            //if (name.StartsWith('#'))
-            //{
-            //    name = name[1..];
-            //}
+            if (say.Length + rawSay.Length > 0)
+            {
+                foreach (var character in charactersList)
+                {
+                    if (character.CountInfo.TryGetValue(fileName, out var countInfo))
+                    {
+                        if (say.Length > 0)
+                        {
+                            countInfo.WordCount += say.Length;
+                            countInfo.LineCount++;
+                        }
 
-            //if (!Utils.AssetKeyword.Contains(name[..2]))
-            //{
-            //    var pinyin = WordsHelper.GetFirstPinyin(name);
+                        if (rawSay.Length > 0)
+                        {
+                            countInfo.RawWordCount += rawSay.Length;
+                            countInfo.RawLineCount++;
+                        }
 
-            //    if (pinyin == "CNE")
-            //    {
-            //        pinyin = "CNR";
-            //    }
-
-            //    if (!characterNameDict.TryGetValue(name, out var character) && !characterPyDict.TryGetValue(pinyin, out character))
-            //    {
-            //        character = new CharacterData(name, pinyin);
-            //        characterNameDict.TryAdd(name, character);
-            //        characterPyDict.TryAdd(pinyin, character);
-            //    }
-
-            //    if (body.StartsWith('"') && body.EndsWith('"'))
-            //    {
-            //        var say = body[1..^1];
-
-            //        //character.WordCount += say.Length;
-            //        //character.LineCount++;
-
-            //        //Debug.WriteLine(line);
-            //    }
-            //    else
-            //    {
-            //        //Debug.WriteLine(line);
-
-            //    }
-            //}
-            //else
-            //{
-            //    var type = name switch {
-            //        "场景" => EAssetType.Scene,
-            //        "音效" => EAssetType.Music,
-            //        "道具" => EAssetType.Item,
-            //        "立绘" => EAssetType.Spire,
-            //        "CG" => EAssetType.CG,
-            //        _ => EAssetType.None,
-            //    };
-
-            //    //assetList.Add(new AssetData(type, body, 1));
-            //}
+                        var dialog = new CharacterDialogData(lineId, say, rawSay);
+                        countInfo.Dialogs.Add(dialog);
+                    }
+                }
+            }
         }
 
         context.CharacterList.Edit(list => {
@@ -478,6 +532,4 @@ public partial class FrmMain : Form
             x.AddRange(assetDict.Values);
         });
     }
-
-
 }

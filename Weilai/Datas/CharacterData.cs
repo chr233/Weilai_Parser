@@ -1,10 +1,12 @@
 namespace Weilai.Datas;
+
 public sealed record CharacterData
 {
     public string FullName { get; init; }
     public string PinYinName { get; init; }
-    public Dictionary<string, CountInfoData> CountInfo { get; } = [];
     public HashSet<string> Emojis { get; } = [];
+
+    public Dictionary<string, CountInfoData> CountInfo { get; } = [];
 
     public CharacterData(string fullName, string pinYinName)
     {
@@ -12,12 +14,36 @@ public sealed record CharacterData
         PinYinName = pinYinName;
     }
 
-    public sealed record CountInfoData
+    public override string ToString()
     {
-        public long WordCount { get; set; }
-        public long RawWordCount { get; set; }
-        public long LineCount { get; set; }
-        public long RawLineCount { get; set; }
+        return CountInfo.Values.FirstOrDefault()?.ToString() ?? "null";
     }
 }
 
+public sealed record CountInfoData
+{
+    public long WordCount { get; set; }
+    public long RawWordCount { get; set; }
+    public long LineCount { get; set; }
+    public long RawLineCount { get; set; }
+    public List<CharacterDialogData> Dialogs { get; } = [];
+
+    public override string ToString()
+    {
+        return $"{WordCount} - {RawWordCount} - {LineCount} - {RawLineCount} = {Dialogs.Count}";
+    }
+}
+
+public sealed record CharacterDialogData
+{
+    public long LineId { get; set; }
+    public string? Content { get; init; }
+    public string? RawContent { get; set; }
+
+    public CharacterDialogData(long lineId, string? content, string? rawContent)
+    {
+        LineId = lineId;
+        Content = content;
+        RawContent = rawContent;
+    }
+}

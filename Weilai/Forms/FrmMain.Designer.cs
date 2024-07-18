@@ -44,6 +44,12 @@ namespace Weilai.Forms
             lvCharacterCh5 = new ColumnHeader();
             lvCharacterCh6 = new ColumnHeader();
             tabPage2 = new TabPage();
+            lvDialog = new ListView();
+            lvDialog1 = new ColumnHeader();
+            lvDialog2 = new ColumnHeader();
+            lvDialog3 = new ColumnHeader();
+            lvDialog4 = new ColumnHeader();
+            lvDialog5 = new ColumnHeader();
             tabPage3 = new TabPage();
             lvAsset = new ListView();
             lvAssetCh1 = new ColumnHeader();
@@ -54,8 +60,10 @@ namespace Weilai.Forms
             pbProcess = new ProgressBar();
             cbFileFilter = new ComboBox();
             label2 = new Label();
+            cbHiddenZero = new CheckBox();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
+            tabPage2.SuspendLayout();
             tabPage3.SuspendLayout();
             SuspendLayout();
             // 
@@ -67,7 +75,7 @@ namespace Weilai.Forms
             lvFiles.Location = new Point(131, 12);
             lvFiles.Name = "lvFiles";
             lvFiles.Size = new Size(540, 179);
-            lvFiles.TabIndex = 1;
+            lvFiles.TabIndex = 11;
             lvFiles.UseCompatibleStateImageBehavior = false;
             lvFiles.View = View.Details;
             lvFiles.DragDrop += LvFiles_DragDrop;
@@ -88,8 +96,8 @@ namespace Weilai.Forms
             btnSelectFile.Location = new Point(12, 12);
             btnSelectFile.Name = "btnSelectFile";
             btnSelectFile.Size = new Size(113, 28);
-            btnSelectFile.TabIndex = 2;
-            btnSelectFile.Text = "选择文件";
+            btnSelectFile.TabIndex = 0;
+            btnSelectFile.Text = "&S. 选择文件";
             btnSelectFile.UseVisualStyleBackColor = true;
             btnSelectFile.Click += BtnSelectFile_Click;
             // 
@@ -108,8 +116,8 @@ namespace Weilai.Forms
             btnClearFileList.Location = new Point(12, 64);
             btnClearFileList.Name = "btnClearFileList";
             btnClearFileList.Size = new Size(113, 28);
-            btnClearFileList.TabIndex = 4;
-            btnClearFileList.Text = "清空列表";
+            btnClearFileList.TabIndex = 1;
+            btnClearFileList.Text = "&C. 清空列表";
             btnClearFileList.UseVisualStyleBackColor = true;
             btnClearFileList.Click += BtnClearFileList_Click;
             // 
@@ -123,7 +131,7 @@ namespace Weilai.Forms
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
             tabControl1.Size = new Size(659, 341);
-            tabControl1.TabIndex = 5;
+            tabControl1.TabIndex = 7;
             // 
             // tabPage1
             // 
@@ -144,7 +152,7 @@ namespace Weilai.Forms
             lvCharacter.Location = new Point(3, 3);
             lvCharacter.Name = "lvCharacter";
             lvCharacter.Size = new Size(645, 305);
-            lvCharacter.TabIndex = 0;
+            lvCharacter.TabIndex = 8;
             lvCharacter.UseCompatibleStateImageBehavior = false;
             lvCharacter.View = View.Details;
             // 
@@ -180,13 +188,48 @@ namespace Weilai.Forms
             // 
             // tabPage2
             // 
+            tabPage2.Controls.Add(lvDialog);
             tabPage2.Location = new Point(4, 26);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(651, 552);
+            tabPage2.Size = new Size(651, 311);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "台词信息";
             tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // lvDialog
+            // 
+            lvDialog.Columns.AddRange(new ColumnHeader[] { lvDialog1, lvDialog2, lvDialog3, lvDialog4, lvDialog5 });
+            lvDialog.Dock = DockStyle.Fill;
+            lvDialog.FullRowSelect = true;
+            lvDialog.Location = new Point(3, 3);
+            lvDialog.Name = "lvDialog";
+            lvDialog.Size = new Size(645, 305);
+            lvDialog.TabIndex = 9;
+            lvDialog.UseCompatibleStateImageBehavior = false;
+            lvDialog.View = View.Details;
+            // 
+            // lvDialog1
+            // 
+            lvDialog1.Text = "角色";
+            // 
+            // lvDialog2
+            // 
+            lvDialog2.Text = "代号";
+            // 
+            // lvDialog3
+            // 
+            lvDialog3.Text = "行号";
+            // 
+            // lvDialog4
+            // 
+            lvDialog4.Text = "文本";
+            lvDialog4.Width = 200;
+            // 
+            // lvDialog5
+            // 
+            lvDialog5.Text = "文本(去除符号)";
+            lvDialog5.Width = 200;
             // 
             // tabPage3
             // 
@@ -194,7 +237,7 @@ namespace Weilai.Forms
             tabPage3.Location = new Point(4, 26);
             tabPage3.Name = "tabPage3";
             tabPage3.Padding = new Padding(3);
-            tabPage3.Size = new Size(651, 552);
+            tabPage3.Size = new Size(651, 311);
             tabPage3.TabIndex = 2;
             tabPage3.Text = "资源列表";
             tabPage3.UseVisualStyleBackColor = true;
@@ -206,8 +249,8 @@ namespace Weilai.Forms
             lvAsset.FullRowSelect = true;
             lvAsset.Location = new Point(3, 3);
             lvAsset.Name = "lvAsset";
-            lvAsset.Size = new Size(645, 546);
-            lvAsset.TabIndex = 0;
+            lvAsset.Size = new Size(645, 305);
+            lvAsset.TabIndex = 10;
             lvAsset.UseCompatibleStateImageBehavior = false;
             lvAsset.View = View.Details;
             // 
@@ -233,16 +276,17 @@ namespace Weilai.Forms
             btnExport.Name = "btnExport";
             btnExport.Size = new Size(113, 25);
             btnExport.TabIndex = 6;
-            btnExport.Text = "导出结果";
+            btnExport.Text = "&E. 导出结果";
             btnExport.UseVisualStyleBackColor = true;
+            btnExport.Click += BtnExport_Click;
             // 
             // btnParse
             // 
             btnParse.Location = new Point(12, 150);
             btnParse.Name = "btnParse";
             btnParse.Size = new Size(113, 41);
-            btnParse.TabIndex = 7;
-            btnParse.Text = "解析文件";
+            btnParse.TabIndex = 2;
+            btnParse.Text = "&P. 解析文件";
             btnParse.UseVisualStyleBackColor = true;
             btnParse.Click += BtnParse_Click;
             // 
@@ -261,24 +305,39 @@ namespace Weilai.Forms
             cbFileFilter.ItemHeight = 17;
             cbFileFilter.Location = new Point(131, 213);
             cbFileFilter.Name = "cbFileFilter";
-            cbFileFilter.Size = new Size(421, 25);
-            cbFileFilter.TabIndex = 9;
+            cbFileFilter.Size = new Size(323, 25);
+            cbFileFilter.TabIndex = 4;
             cbFileFilter.SelectedIndexChanged += CbFileFilter_SelectedIndexChanged;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(34, 217);
+            label2.Location = new Point(28, 217);
             label2.Name = "label2";
-            label2.Size = new Size(68, 17);
-            label2.TabIndex = 10;
-            label2.Text = "按文件筛选";
+            label2.Size = new Size(81, 17);
+            label2.TabIndex = 3;
+            label2.Text = "&F. 按文件筛选";
+            // 
+            // cbHiddenZero
+            // 
+            cbHiddenZero.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            cbHiddenZero.AutoSize = true;
+            cbHiddenZero.Checked = true;
+            cbHiddenZero.CheckState = CheckState.Checked;
+            cbHiddenZero.Location = new Point(460, 215);
+            cbHiddenZero.Name = "cbHiddenZero";
+            cbHiddenZero.Size = new Size(92, 21);
+            cbHiddenZero.TabIndex = 5;
+            cbHiddenZero.Text = "隐藏\"0\"项目";
+            cbHiddenZero.UseVisualStyleBackColor = true;
+            cbHiddenZero.CheckedChanged += CbHiddenZero_CheckedChanged;
             // 
             // FrmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(683, 597);
+            Controls.Add(cbHiddenZero);
             Controls.Add(label2);
             Controls.Add(cbFileFilter);
             Controls.Add(pbProcess);
@@ -293,6 +352,7 @@ namespace Weilai.Forms
             Text = "FrmMain";
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
+            tabPage2.ResumeLayout(false);
             tabPage3.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
@@ -321,7 +381,7 @@ namespace Weilai.Forms
         private ColumnHeader columnHeader8;
         private ColumnHeader columnHeader5;
         private ColumnHeader columnHeader6;
-        private ColumnHeader columnHeader3;
+        private ColumnHeader lvDialog3;
         private ColumnHeader columnHeader4;
         private ColumnHeader lvAssetCh3;
         private ComboBox cbFileFilter;
@@ -331,5 +391,11 @@ namespace Weilai.Forms
         private ListView lvAsset;
         private ColumnHeader lvAssetCh1;
         private ColumnHeader lvAssetCh2;
+        private CheckBox cbHiddenZero;
+        private ListView lvDialog;
+        private ColumnHeader lvDialog1;
+        private ColumnHeader lvDialog2;
+        private ColumnHeader lvDialog4;
+        private ColumnHeader lvDialog5;
     }
 }

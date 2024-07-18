@@ -25,4 +25,5 @@ public enum EAssetType : byte
     /// </summary>
     Voice,
     Other,
+    Unknown,
 }

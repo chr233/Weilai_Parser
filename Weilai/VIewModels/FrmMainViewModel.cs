@@ -32,4 +32,7 @@ public sealed partial class FrmMainViewModel : ObservableObject
 
     [ObservableProperty]
     private bool allowOperate = true;
+
+    [ObservableProperty]
+    private bool hiddenZero = true;
 }
