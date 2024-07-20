@@ -48,6 +48,7 @@ namespace Weilai.Forms
             lvDialog1 = new ColumnHeader();
             lvDialog2 = new ColumnHeader();
             lvDialog3 = new ColumnHeader();
+            lvDialog4 = new ColumnHeader();
             lvDialog5 = new ColumnHeader();
             lvDialog6 = new ColumnHeader();
             lvDialog7 = new ColumnHeader();
@@ -67,7 +68,6 @@ namespace Weilai.Forms
             label2 = new Label();
             cbHiddenZero = new CheckBox();
             btnSelectFolder = new Button();
-            lvDialog4 = new ColumnHeader();
             tcMain.SuspendLayout();
             tcMainTp1.SuspendLayout();
             tcMainTp2.SuspendLayout();
@@ -78,7 +78,6 @@ namespace Weilai.Forms
             // 
             // lvFiles
             // 
-            lvFiles.AllowDrop = true;
             lvFiles.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             lvFiles.Columns.AddRange(new ColumnHeader[] { lvFilesCh1, lvFilesCh2 });
             lvFiles.Location = new Point(131, 12);
@@ -87,8 +86,6 @@ namespace Weilai.Forms
             lvFiles.TabIndex = 11;
             lvFiles.UseCompatibleStateImageBehavior = false;
             lvFiles.View = View.Details;
-            lvFiles.DragDrop += LvFiles_DragDrop;
-            lvFiles.DragEnter += LvFiles_DragEnter;
             // 
             // lvFilesCh1
             // 
@@ -149,7 +146,7 @@ namespace Weilai.Forms
             tcMainTp1.Location = new Point(4, 26);
             tcMainTp1.Name = "tcMainTp1";
             tcMainTp1.Padding = new Padding(3);
-            tcMainTp1.Size = new Size(693, 311);
+            tcMainTp1.Size = new Size(758, 311);
             tcMainTp1.TabIndex = 0;
             tcMainTp1.Text = "角色信息统计";
             tcMainTp1.UseVisualStyleBackColor = true;
@@ -161,7 +158,7 @@ namespace Weilai.Forms
             lvCharacter.FullRowSelect = true;
             lvCharacter.Location = new Point(3, 3);
             lvCharacter.Name = "lvCharacter";
-            lvCharacter.Size = new Size(687, 305);
+            lvCharacter.Size = new Size(752, 305);
             lvCharacter.TabIndex = 8;
             lvCharacter.UseCompatibleStateImageBehavior = false;
             lvCharacter.View = View.Details;
@@ -231,6 +228,10 @@ namespace Weilai.Forms
             // 
             lvDialog3.Text = "行号";
             // 
+            // lvDialog4
+            // 
+            lvDialog4.Text = "表情";
+            // 
             // lvDialog5
             // 
             lvDialog5.Text = "文本";
@@ -252,7 +253,7 @@ namespace Weilai.Forms
             tcMainTp3.Location = new Point(4, 26);
             tcMainTp3.Name = "tcMainTp3";
             tcMainTp3.Padding = new Padding(3);
-            tcMainTp3.Size = new Size(693, 311);
+            tcMainTp3.Size = new Size(758, 311);
             tcMainTp3.TabIndex = 2;
             tcMainTp3.Text = "资源列表";
             tcMainTp3.UseVisualStyleBackColor = true;
@@ -264,7 +265,7 @@ namespace Weilai.Forms
             lvAsset.FullRowSelect = true;
             lvAsset.Location = new Point(3, 3);
             lvAsset.Name = "lvAsset";
-            lvAsset.Size = new Size(687, 305);
+            lvAsset.Size = new Size(752, 305);
             lvAsset.TabIndex = 10;
             lvAsset.UseCompatibleStateImageBehavior = false;
             lvAsset.View = View.Details;
@@ -291,7 +292,7 @@ namespace Weilai.Forms
             tcMainTp4.Location = new Point(4, 26);
             tcMainTp4.Name = "tcMainTp4";
             tcMainTp4.Padding = new Padding(3);
-            tcMainTp4.Size = new Size(693, 311);
+            tcMainTp4.Size = new Size(758, 311);
             tcMainTp4.TabIndex = 3;
             tcMainTp4.Text = "导出";
             tcMainTp4.UseVisualStyleBackColor = true;
@@ -400,12 +401,9 @@ namespace Weilai.Forms
             btnSelectFolder.UseVisualStyleBackColor = true;
             btnSelectFolder.Click += BtnSelectFolder_Click;
             // 
-            // lvDialog4
-            // 
-            lvDialog4.Text = "表情";
-            // 
             // FrmMain
             // 
+            AllowDrop = true;
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(790, 597);
@@ -424,6 +422,8 @@ namespace Weilai.Forms
             Text = "FrmMain";
             FormClosing += FrmMain_FormClosing;
             Load += FrmMain_Load;
+            DragDrop += FrmMain_DragDrop;
+            DragEnter += FrmMain_DragEnter;
             tcMain.ResumeLayout(false);
             tcMainTp1.ResumeLayout(false);
             tcMainTp2.ResumeLayout(false);

@@ -38,9 +38,11 @@ public partial class FrmMain : Form
         pbProcess.DataBindings.Add(nameof(pbProcess.Maximum), context, nameof(context.ProgressMax));
 
         btnSelectFile.DataBindings.Add(nameof(btnClearFileList.Enabled), context, nameof(context.AllowOperate));
+        btnSelectFolder.DataBindings.Add(nameof(btnSelectFolder.Enabled), context, nameof(context.AllowOperate));
         btnClearFileList.DataBindings.Add(nameof(btnClearFileList.Enabled), context, nameof(context.AllowOperate));
         btnExport.DataBindings.Add(nameof(btnClearFileList.Enabled), context, nameof(context.AllowOperate));
         btnParse.DataBindings.Add(nameof(btnClearFileList.Enabled), context, nameof(context.AllowOperate));
+        cbFileFilter.DataBindings.Add(nameof(cbFileFilter.Enabled), context, nameof(context.AllowOperate));
 
         txtExportFolder.DataBindings.Add(nameof(txtExportFolder.Text), context, nameof(context.ExportFolder));
     }
@@ -466,5 +468,35 @@ public partial class FrmMain : Form
         config.HiddenZero = context.HiddenZero;
 
         config.Save();
+    }
+
+    private void FrmMain_DragEnter(object sender, DragEventArgs e)
+    {
+        e.Effect = (e.Data?.GetDataPresent(DataFormats.FileDrop) == true) ? DragDropEffects.Copy : DragDropEffects.None;
+    }
+
+    private void FrmMain_DragDrop(object sender, DragEventArgs e)
+    {
+        if (e.Data != null)
+        {
+            var data = e.Data.GetData(DataFormats.FileDrop);
+            if (data is string[] filePaths && filePaths.Length > 0)
+            {
+                context.FileList.Edit(list => {
+                    var paths = list.Select(static x => x.Path).ToHashSet();
+
+                    foreach (var filePath in filePaths)
+                    {
+                        if (filePath.StartsWith("~$") || paths.Contains(filePath))
+                        {
+                            continue;
+                        }
+
+                        var fileName = Path.GetFileName(filePath);
+                        list.Add(new FileInfoData(fileName, filePath));
+                    }
+                });
+            }
+        }
     }
 }
