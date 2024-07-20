@@ -4,8 +4,6 @@ public sealed record CharacterData
 {
     public string FullName { get; init; }
     public string PinYinName { get; init; }
-    public HashSet<string> Emojis { get; } = [];
-
     public Dictionary<string, CountInfoData> CountInfo { get; } = [];
 
     public CharacterData(string fullName, string pinYinName)
@@ -37,12 +35,14 @@ public sealed record CountInfoData
 public sealed record CharacterDialogData
 {
     public long LineId { get; set; }
+    public string Emoji { get; set; }
     public string? Content { get; init; }
     public string? RawContent { get; set; }
 
-    public CharacterDialogData(long lineId, string? content, string? rawContent)
+    public CharacterDialogData(long lineId, string emoji, string? content, string? rawContent)
     {
         LineId = lineId;
+        Emoji = emoji;
         Content = content;
         RawContent = rawContent;
     }

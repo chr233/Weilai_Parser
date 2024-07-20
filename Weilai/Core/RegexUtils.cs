@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Weilai;
+namespace Weilai.Core;
 
 public static partial class RegexUtils
 {

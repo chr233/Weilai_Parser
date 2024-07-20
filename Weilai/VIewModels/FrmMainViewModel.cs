@@ -35,4 +35,10 @@ public sealed partial class FrmMainViewModel : ObservableObject
 
     [ObservableProperty]
     private bool hiddenZero = true;
+
+    [ObservableProperty]
+    private string importInitFolder = "";
+
+    [ObservableProperty]
+    private string exportFolder = "";
 }

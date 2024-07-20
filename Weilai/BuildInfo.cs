@@ -32,13 +32,4 @@ public static class BuildInfo
     /// 框架
     /// </summary>
     public static string? FrameworkName => _assembly.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkDisplayName;
-
-    /// <summary>
-    /// 是否为调试模式
-    /// </summary>
-#if DEBUG
-    public const bool IsDebug = true;
-#else
-    public const bool IsDebug = false;
-#endif
 }

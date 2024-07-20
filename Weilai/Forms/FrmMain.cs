@@ -1,6 +1,6 @@
 using DynamicData;
 using System.Diagnostics;
-using ToolGood.Words.FirstPinyin;
+using Weilai.Core;
 using Weilai.Datas;
 using Weilai.VIewModels;
 
@@ -24,7 +24,7 @@ public partial class FrmMain : Form
         context.FileList.Add(new FileInfoData("demo.docx", "C:\\Users\\chr11\\Downloads\\demo.docx"));
 #endif
 
-        tabControl1.TabIndex = 0;
+        tcMain.TabIndex = 0;
     }
 
     private void BindControls()
@@ -41,6 +41,8 @@ public partial class FrmMain : Form
         btnClearFileList.DataBindings.Add(nameof(btnClearFileList.Enabled), context, nameof(context.AllowOperate));
         btnExport.DataBindings.Add(nameof(btnClearFileList.Enabled), context, nameof(context.AllowOperate));
         btnParse.DataBindings.Add(nameof(btnClearFileList.Enabled), context, nameof(context.AllowOperate));
+
+        txtExportFolder.DataBindings.Add(nameof(txtExportFolder.Text), context, nameof(context.ExportFolder));
     }
 
     private void OnFileListChange(IChangeSet<FileInfoData> e)
@@ -138,19 +140,28 @@ public partial class FrmMain : Form
 
             foreach (var dialog in dialogs)
             {
+                var count = dialog.Content?.Length ?? 0;
+                var rawCount = dialog.RawContent?.Length ?? 0;
+
+                if (rawCount == 0)
+                {
+                    count = 0;
+                }
+
                 var item = new ListViewItem {
                     Text = character.FullName,
                     SubItems = {
                         character.PinYinName,
                         dialog.LineId.ToString(),
+                        dialog.Emoji,
                         dialog.Content,
                         dialog.RawContent,
+                        string.Format("{0} ({1})",count,rawCount),
                     },
                 };
 
                 lvDialog.Items.Add(item);
             }
-
         }
 
         lvCharacter.EndUpdate();
@@ -197,17 +208,29 @@ public partial class FrmMain : Form
             Filter = "受支持的文件 (*.docx;*.txt;*.rtf)|*.docs;*.rtf;*.txt|所有文件 (*.*)|*.*",
             Multiselect = true,
             AutoUpgradeEnabled = true,
+            AddToRecent = false,
         };
+
+        if (!string.IsNullOrEmpty(context.ImportInitFolder))
+        {
+            dialog.InitialDirectory = context.ImportInitFolder;
+        }
 
         if (dialog.ShowDialog() == DialogResult.OK && dialog.FileNames.Length > 0)
         {
             context.FileList.Edit(list => {
                 var paths = list.Select(static x => x.Path).ToHashSet();
-                var newList = new List<FileInfoData>();
 
                 foreach (var filePath in dialog.FileNames)
                 {
-                    if (!paths.Contains(filePath))
+                    if (filePath.StartsWith("~$") || paths.Contains(filePath))
+                    {
+                        continue;
+                    }
+
+                    var ext = Path.GetExtension(filePath).ToUpperInvariant();
+
+                    if (ext == ".TXT" || ext == ".RTF" || ext == ".DOCX")
                     {
                         var fileName = Path.GetFileName(filePath);
                         list.Add(new FileInfoData(fileName, filePath));
@@ -217,7 +240,44 @@ public partial class FrmMain : Form
         }
     }
 
-    private async void BtnExport_Click(object sender, EventArgs e)
+    private void BtnSelectFolder_Click(object sender, EventArgs e)
+    {
+        using var dialog = new FolderBrowserDialog {
+            ShowNewFolderButton = true,
+            AutoUpgradeEnabled = true,
+            AddToRecent = false,
+        };
+
+        if (!string.IsNullOrEmpty(context.ImportInitFolder))
+        {
+            dialog.InitialDirectory = context.ImportInitFolder;
+        }
+
+        if (dialog.ShowDialog() == DialogResult.OK)
+        {
+            var path = dialog.SelectedPath;
+
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            {
+                context.FileList.Edit(list => {
+                    var paths = list.Select(static x => x.Path).ToHashSet();
+
+                    foreach (var filePath in Directory.GetFiles(path, "*.*", SearchOption.AllDirectories))
+                    {
+                        if (filePath.StartsWith("~$") || paths.Contains(filePath))
+                        {
+                            continue;
+                        }
+
+                        var fileName = Path.GetFileName(filePath);
+                        list.Add(new FileInfoData(fileName, filePath));
+                    }
+                });
+            }
+        }
+    }
+
+    private void BtnExportFolder_Click(object sender, EventArgs e)
     {
         using var dialog = new FolderBrowserDialog {
             ShowNewFolderButton = true,
@@ -226,10 +286,42 @@ public partial class FrmMain : Form
 
         if (dialog.ShowDialog() == DialogResult.OK)
         {
-            var path = dialog.SelectedPath;
+            context.ExportFolder = dialog.SelectedPath;
+        }
+    }
 
-            await Utils.ExportSummary(path, context.SelectedFile, context.CharacterList.Items, context.AssetList.Items).ConfigureAwait(false);
-            await Utils.ExportDetail(path, context.SelectedFile, context.CharacterList.Items, context.AssetList.Items).ConfigureAwait(false);
+    private void BtnExport_Click(object sender, EventArgs e)
+    {
+        if (context.CharacterList.Count + context.AssetList.Count == 0)
+        {
+            MessageBox.Show(this, "请先解析文件", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        if (!Directory.Exists(context.ExportFolder))
+        {
+            MessageBox.Show(this, "导出路径不存在", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        var filePath = context.ExportFolder;
+        var fileList = context.FileList;
+        var characterList = context.CharacterList;
+        var assetList = context.AssetList;
+
+        try
+        {
+            FileDumper.ExportAssets(filePath, fileList, assetList);
+            FileDumper.ExportCharacterSummary(filePath, fileList, characterList, assetList);
+
+            foreach (var fileInfo in fileList.Items)
+            {
+                FileDumper.ExportCharacter(filePath, fileInfo.Name, characterList, assetList);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
         }
     }
 
@@ -255,11 +347,13 @@ public partial class FrmMain : Form
 
                     foreach (var filePath in filePaths)
                     {
-                        if (!paths.Contains(filePath))
+                        if (filePath.StartsWith("~$") || paths.Contains(filePath))
                         {
-                            var fileName = Path.GetFileName(filePath);
-                            list.Add(new FileInfoData(fileName, filePath));
+                            continue;
                         }
+
+                        var fileName = Path.GetFileName(filePath);
+                        list.Add(new FileInfoData(fileName, filePath));
                     }
                 });
             }
@@ -312,9 +406,9 @@ public partial class FrmMain : Form
                     var extension = Path.GetExtension(filePath).ToUpper();
 
                     var handler = extension switch {
-                        ".TXT" => Utils.ReadText(filePath),
-                        ".RTF" => Utils.ReadText(filePath),
-                        ".DOCX" => Utils.ReadDocx(filePath),
+                        ".TXT" => FileReader.ReadText(filePath),
+                        ".RTF" => FileReader.ReadText(filePath),
+                        ".DOCX" => FileReader.ReadDocx(filePath),
                         _ => null,
                     };
 
@@ -328,7 +422,7 @@ public partial class FrmMain : Form
                     var content = await handler.ConfigureAwait(true);
 #pragma warning restore CAC002 // ConfigureAwaitChecker
 
-                    JubenParser(fileInfo.Name, content);
+                    ContentParser.JubenParser(fileInfo.Name, content, context.CharacterList, context.AssetList);
                 }
                 catch (Exception ex)
                 {
@@ -352,184 +446,25 @@ public partial class FrmMain : Form
         }
     }
 
-    //================================================================
-
-    /// <summary>
-    /// 解析剧本
-    /// </summary>
-    /// <param name="fileName"></param>
-    /// <param name="fileContent"></param>
-    private void JubenParser(string fileName, string fileContent)
+    private void FrmMain_Load(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(fileContent))
-        {
-            return;
-        }
+        var config = AppConfig.Default;
 
-        var lines = fileContent.Split(Utils.Separator, StringSplitOptions.RemoveEmptyEntries);
+        context.ImportInitFolder = config.ImportFolder;
+        context.ExportFolder = config.ExportFolder;
+        context.HiddenZero = config.HiddenZero;
 
-        var characterNameDict = context.CharacterList.Items.ToDictionary(static x => x.FullName, static x => x);
-        var characterPyDict = context.CharacterList.Items.ToDictionary(static x => x.PinYinName, static x => x);
+        cbHiddenZero.Checked = context.HiddenZero;
+    }
 
-        var assetDict = context.AssetList.Items.ToDictionary(static x => x.Name, static x => x);
+    private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        var config = AppConfig.Default;
 
-        var regexRawString = RegexUtils.MatchRawString();
+        config.ImportFolder = context.ImportInitFolder;
+        config.ExportFolder = context.ExportFolder;
+        config.HiddenZero = context.HiddenZero;
 
-        //第一遍扫描剧本, 添加角色和资源
-        foreach (var line in lines)
-        {
-            var trimedStart = line.Trim();
-
-            if (string.IsNullOrEmpty(trimedStart) || (!trimedStart.Contains('#') && !trimedStart.Contains('@')))
-            {
-                continue;
-            }
-
-            trimedStart = trimedStart[1..].Trim();
-
-            var temp = trimedStart.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-            var keyword = temp.FirstOrDefault("");
-
-            if (string.IsNullOrEmpty(keyword))
-            {
-                continue;
-            }
-
-            var assetType = Utils.GetAssetType(keyword);
-
-            if (assetType != EAssetType.None)
-            {
-                //判断为资源
-                if (!assetDict.TryGetValue(trimedStart, out var assetInfo))
-                {
-                    assetInfo = new AssetData(trimedStart, assetType);
-                    assetDict.Add(trimedStart, assetInfo);
-                }
-
-                if (!assetInfo.CountInfo.TryGetValue(fileName, out var countInfo))
-                {
-                    countInfo = 0;
-                }
-
-                assetInfo.CountInfo[fileName] = countInfo + 1;
-            }
-            else
-            {
-                //判断为角色
-                var parts = line[1..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-                if (parts.Length == 0)
-                {
-                    continue;
-                }
-
-                var name = parts[0];
-                if (name.Length == 0 || name.Length > 6)
-                {
-                    continue;
-                }
-
-                var pinyin = WordsHelper.GetFirstPinyin(name);
-
-                if (pinyin == "CNE")
-                {
-                    pinyin = "CNR";
-                }
-
-                if (!characterNameDict.TryGetValue(name, out var character) &&
-                    !characterPyDict.TryGetValue(pinyin, out character))
-                {
-                    character = new CharacterData(name, pinyin);
-
-                    characterNameDict.TryAdd(name, character);
-                    characterPyDict.TryAdd(pinyin, character);
-                }
-
-                character.CountInfo.TryAdd(fileName, new CountInfoData());
-
-                for (var i = 1; i < parts.Length; i++)
-                {
-                    var part = parts[i];
-                    if (part.StartsWith('"'))
-                    {
-                        break;
-                    }
-
-                    character.Emojis.Add(part);
-                }
-            }
-        }
-
-        //解析台词
-        for (var lineId = 0; lineId < lines.Length; lineId++)
-        {
-            var line = lines[lineId];
-            var parts = line.Trim().Split('"', 2, StringSplitOptions.RemoveEmptyEntries);
-
-            if (parts.Length < 2)
-            {
-                continue;
-            }
-
-            var strNames = parts[0].ToUpperInvariant();
-            var names = strNames.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            List<CharacterData> charactersList = [];
-            foreach (var name in names)
-            {
-                if (characterNameDict.TryGetValue(name, out var character) ||
-                    characterPyDict.TryGetValue(name, out character))
-                {
-                    charactersList.Add(character);
-                }
-            }
-
-            if (charactersList.Count == 0)
-            {
-                continue;
-            }
-
-            var say = parts[1];
-            if (say.EndsWith('"'))
-            {
-                say = say[..^1];
-            }
-
-            var rawSay = regexRawString.Replace(say, "");
-
-            if (say.Length + rawSay.Length > 0)
-            {
-                foreach (var character in charactersList)
-                {
-                    if (character.CountInfo.TryGetValue(fileName, out var countInfo))
-                    {
-                        if (say.Length > 0)
-                        {
-                            countInfo.WordCount += say.Length;
-                            countInfo.LineCount++;
-                        }
-
-                        if (rawSay.Length > 0)
-                        {
-                            countInfo.RawWordCount += rawSay.Length;
-                            countInfo.RawLineCount++;
-                        }
-
-                        var dialog = new CharacterDialogData(lineId, say, rawSay);
-                        countInfo.Dialogs.Add(dialog);
-                    }
-                }
-            }
-        }
-
-        context.CharacterList.Edit(list => {
-            list.Clear();
-            list.AddRange(characterNameDict.Values);
-        });
-
-        context.AssetList.Edit(x => {
-            x.Clear();
-            x.AddRange(assetDict.Values);
-        });
+        config.Save();
     }
 }

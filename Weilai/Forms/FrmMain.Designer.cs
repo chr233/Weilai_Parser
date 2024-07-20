@@ -34,8 +34,8 @@ namespace Weilai.Forms
             btnSelectFile = new Button();
             label1 = new Label();
             btnClearFileList = new Button();
-            tabControl1 = new TabControl();
-            tabPage1 = new TabPage();
+            tcMain = new TabControl();
+            tcMainTp1 = new TabPage();
             lvCharacter = new ListView();
             lvCharacterCh1 = new ColumnHeader();
             lvCharacterCh2 = new ColumnHeader();
@@ -43,28 +43,37 @@ namespace Weilai.Forms
             lvCharacterCh4 = new ColumnHeader();
             lvCharacterCh5 = new ColumnHeader();
             lvCharacterCh6 = new ColumnHeader();
-            tabPage2 = new TabPage();
+            tcMainTp2 = new TabPage();
             lvDialog = new ListView();
             lvDialog1 = new ColumnHeader();
             lvDialog2 = new ColumnHeader();
             lvDialog3 = new ColumnHeader();
-            lvDialog4 = new ColumnHeader();
             lvDialog5 = new ColumnHeader();
-            tabPage3 = new TabPage();
+            lvDialog6 = new ColumnHeader();
+            lvDialog7 = new ColumnHeader();
+            tcMainTp3 = new TabPage();
             lvAsset = new ListView();
             lvAssetCh1 = new ColumnHeader();
             lvAssetCh2 = new ColumnHeader();
             lvAssetCh3 = new ColumnHeader();
+            tcMainTp4 = new TabPage();
+            groupBox1 = new GroupBox();
+            btnExportFolder = new Button();
+            txtExportFolder = new TextBox();
             btnExport = new Button();
             btnParse = new Button();
             pbProcess = new ProgressBar();
             cbFileFilter = new ComboBox();
             label2 = new Label();
             cbHiddenZero = new CheckBox();
-            tabControl1.SuspendLayout();
-            tabPage1.SuspendLayout();
-            tabPage2.SuspendLayout();
-            tabPage3.SuspendLayout();
+            btnSelectFolder = new Button();
+            lvDialog4 = new ColumnHeader();
+            tcMain.SuspendLayout();
+            tcMainTp1.SuspendLayout();
+            tcMainTp2.SuspendLayout();
+            tcMainTp3.SuspendLayout();
+            tcMainTp4.SuspendLayout();
+            groupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // lvFiles
@@ -74,7 +83,7 @@ namespace Weilai.Forms
             lvFiles.Columns.AddRange(new ColumnHeader[] { lvFilesCh1, lvFilesCh2 });
             lvFiles.Location = new Point(131, 12);
             lvFiles.Name = "lvFiles";
-            lvFiles.Size = new Size(540, 179);
+            lvFiles.Size = new Size(647, 179);
             lvFiles.TabIndex = 11;
             lvFiles.UseCompatibleStateImageBehavior = false;
             lvFiles.View = View.Details;
@@ -105,7 +114,7 @@ namespace Weilai.Forms
             // 
             label1.AutoSize = true;
             label1.ForeColor = SystemColors.AppWorkspace;
-            label1.Location = new Point(40, 43);
+            label1.Location = new Point(40, 111);
             label1.Name = "label1";
             label1.Size = new Size(56, 17);
             label1.TabIndex = 3;
@@ -113,7 +122,7 @@ namespace Weilai.Forms
             // 
             // btnClearFileList
             // 
-            btnClearFileList.Location = new Point(12, 64);
+            btnClearFileList.Location = new Point(12, 80);
             btnClearFileList.Name = "btnClearFileList";
             btnClearFileList.Size = new Size(113, 28);
             btnClearFileList.TabIndex = 1;
@@ -121,28 +130,29 @@ namespace Weilai.Forms
             btnClearFileList.UseVisualStyleBackColor = true;
             btnClearFileList.Click += BtnClearFileList_Click;
             // 
-            // tabControl1
+            // tcMain
             // 
-            tabControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            tabControl1.Controls.Add(tabPage1);
-            tabControl1.Controls.Add(tabPage2);
-            tabControl1.Controls.Add(tabPage3);
-            tabControl1.Location = new Point(12, 244);
-            tabControl1.Name = "tabControl1";
-            tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(659, 341);
-            tabControl1.TabIndex = 7;
+            tcMain.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tcMain.Controls.Add(tcMainTp1);
+            tcMain.Controls.Add(tcMainTp2);
+            tcMain.Controls.Add(tcMainTp3);
+            tcMain.Controls.Add(tcMainTp4);
+            tcMain.Location = new Point(12, 244);
+            tcMain.Name = "tcMain";
+            tcMain.SelectedIndex = 0;
+            tcMain.Size = new Size(766, 341);
+            tcMain.TabIndex = 7;
             // 
-            // tabPage1
+            // tcMainTp1
             // 
-            tabPage1.Controls.Add(lvCharacter);
-            tabPage1.Location = new Point(4, 26);
-            tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(651, 311);
-            tabPage1.TabIndex = 0;
-            tabPage1.Text = "角色信息统计";
-            tabPage1.UseVisualStyleBackColor = true;
+            tcMainTp1.Controls.Add(lvCharacter);
+            tcMainTp1.Location = new Point(4, 26);
+            tcMainTp1.Name = "tcMainTp1";
+            tcMainTp1.Padding = new Padding(3);
+            tcMainTp1.Size = new Size(693, 311);
+            tcMainTp1.TabIndex = 0;
+            tcMainTp1.Text = "角色信息统计";
+            tcMainTp1.UseVisualStyleBackColor = true;
             // 
             // lvCharacter
             // 
@@ -151,7 +161,7 @@ namespace Weilai.Forms
             lvCharacter.FullRowSelect = true;
             lvCharacter.Location = new Point(3, 3);
             lvCharacter.Name = "lvCharacter";
-            lvCharacter.Size = new Size(645, 305);
+            lvCharacter.Size = new Size(687, 305);
             lvCharacter.TabIndex = 8;
             lvCharacter.UseCompatibleStateImageBehavior = false;
             lvCharacter.View = View.Details;
@@ -178,33 +188,33 @@ namespace Weilai.Forms
             // 
             // lvCharacterCh5
             // 
-            lvCharacterCh5.Text = "行数";
+            lvCharacterCh5.Text = "句数";
             lvCharacterCh5.Width = 100;
             // 
             // lvCharacterCh6
             // 
-            lvCharacterCh6.Text = "行数(不含标点)";
+            lvCharacterCh6.Text = "句数(不含标点)";
             lvCharacterCh6.Width = 100;
             // 
-            // tabPage2
+            // tcMainTp2
             // 
-            tabPage2.Controls.Add(lvDialog);
-            tabPage2.Location = new Point(4, 26);
-            tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(651, 311);
-            tabPage2.TabIndex = 1;
-            tabPage2.Text = "台词信息";
-            tabPage2.UseVisualStyleBackColor = true;
+            tcMainTp2.Controls.Add(lvDialog);
+            tcMainTp2.Location = new Point(4, 26);
+            tcMainTp2.Name = "tcMainTp2";
+            tcMainTp2.Padding = new Padding(3);
+            tcMainTp2.Size = new Size(758, 311);
+            tcMainTp2.TabIndex = 1;
+            tcMainTp2.Text = "台词信息";
+            tcMainTp2.UseVisualStyleBackColor = true;
             // 
             // lvDialog
             // 
-            lvDialog.Columns.AddRange(new ColumnHeader[] { lvDialog1, lvDialog2, lvDialog3, lvDialog4, lvDialog5 });
+            lvDialog.Columns.AddRange(new ColumnHeader[] { lvDialog1, lvDialog2, lvDialog3, lvDialog4, lvDialog5, lvDialog6, lvDialog7 });
             lvDialog.Dock = DockStyle.Fill;
             lvDialog.FullRowSelect = true;
             lvDialog.Location = new Point(3, 3);
             lvDialog.Name = "lvDialog";
-            lvDialog.Size = new Size(645, 305);
+            lvDialog.Size = new Size(752, 305);
             lvDialog.TabIndex = 9;
             lvDialog.UseCompatibleStateImageBehavior = false;
             lvDialog.View = View.Details;
@@ -221,26 +231,31 @@ namespace Weilai.Forms
             // 
             lvDialog3.Text = "行号";
             // 
-            // lvDialog4
-            // 
-            lvDialog4.Text = "文本";
-            lvDialog4.Width = 200;
-            // 
             // lvDialog5
             // 
-            lvDialog5.Text = "文本(去除符号)";
+            lvDialog5.Text = "文本";
             lvDialog5.Width = 200;
             // 
-            // tabPage3
+            // lvDialog6
             // 
-            tabPage3.Controls.Add(lvAsset);
-            tabPage3.Location = new Point(4, 26);
-            tabPage3.Name = "tabPage3";
-            tabPage3.Padding = new Padding(3);
-            tabPage3.Size = new Size(651, 311);
-            tabPage3.TabIndex = 2;
-            tabPage3.Text = "资源列表";
-            tabPage3.UseVisualStyleBackColor = true;
+            lvDialog6.Text = "文本(去除符号)";
+            lvDialog6.Width = 200;
+            // 
+            // lvDialog7
+            // 
+            lvDialog7.Text = "字数";
+            lvDialog7.Width = 80;
+            // 
+            // tcMainTp3
+            // 
+            tcMainTp3.Controls.Add(lvAsset);
+            tcMainTp3.Location = new Point(4, 26);
+            tcMainTp3.Name = "tcMainTp3";
+            tcMainTp3.Padding = new Padding(3);
+            tcMainTp3.Size = new Size(693, 311);
+            tcMainTp3.TabIndex = 2;
+            tcMainTp3.Text = "资源列表";
+            tcMainTp3.UseVisualStyleBackColor = true;
             // 
             // lvAsset
             // 
@@ -249,7 +264,7 @@ namespace Weilai.Forms
             lvAsset.FullRowSelect = true;
             lvAsset.Location = new Point(3, 3);
             lvAsset.Name = "lvAsset";
-            lvAsset.Size = new Size(645, 305);
+            lvAsset.Size = new Size(687, 305);
             lvAsset.TabIndex = 10;
             lvAsset.UseCompatibleStateImageBehavior = false;
             lvAsset.View = View.Details;
@@ -269,12 +284,55 @@ namespace Weilai.Forms
             lvAssetCh3.Text = "出现次数";
             lvAssetCh3.Width = 100;
             // 
+            // tcMainTp4
+            // 
+            tcMainTp4.Controls.Add(groupBox1);
+            tcMainTp4.Controls.Add(btnExport);
+            tcMainTp4.Location = new Point(4, 26);
+            tcMainTp4.Name = "tcMainTp4";
+            tcMainTp4.Padding = new Padding(3);
+            tcMainTp4.Size = new Size(693, 311);
+            tcMainTp4.TabIndex = 3;
+            tcMainTp4.Text = "导出";
+            tcMainTp4.UseVisualStyleBackColor = true;
+            // 
+            // groupBox1
+            // 
+            groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox1.Controls.Add(btnExportFolder);
+            groupBox1.Controls.Add(txtExportFolder);
+            groupBox1.Location = new Point(24, 25);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(636, 53);
+            groupBox1.TabIndex = 10;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "导出路径";
+            // 
+            // btnExportFolder
+            // 
+            btnExportFolder.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnExportFolder.Location = new Point(570, 22);
+            btnExportFolder.Name = "btnExportFolder";
+            btnExportFolder.Size = new Size(60, 23);
+            btnExportFolder.TabIndex = 9;
+            btnExportFolder.Text = "...";
+            btnExportFolder.UseVisualStyleBackColor = true;
+            btnExportFolder.Click += BtnExportFolder_Click;
+            // 
+            // txtExportFolder
+            // 
+            txtExportFolder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtExportFolder.Location = new Point(6, 22);
+            txtExportFolder.Name = "txtExportFolder";
+            txtExportFolder.Size = new Size(558, 23);
+            txtExportFolder.TabIndex = 7;
+            // 
             // btnExport
             // 
             btnExport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnExport.Location = new Point(558, 213);
+            btnExport.Location = new Point(528, 97);
             btnExport.Name = "btnExport";
-            btnExport.Size = new Size(113, 25);
+            btnExport.Size = new Size(132, 32);
             btnExport.TabIndex = 6;
             btnExport.Text = "&E. 导出结果";
             btnExport.UseVisualStyleBackColor = true;
@@ -295,7 +353,7 @@ namespace Weilai.Forms
             pbProcess.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pbProcess.Location = new Point(12, 197);
             pbProcess.Name = "pbProcess";
-            pbProcess.Size = new Size(659, 10);
+            pbProcess.Size = new Size(766, 10);
             pbProcess.TabIndex = 8;
             // 
             // cbFileFilter
@@ -305,7 +363,7 @@ namespace Weilai.Forms
             cbFileFilter.ItemHeight = 17;
             cbFileFilter.Location = new Point(131, 213);
             cbFileFilter.Name = "cbFileFilter";
-            cbFileFilter.Size = new Size(323, 25);
+            cbFileFilter.Size = new Size(533, 25);
             cbFileFilter.TabIndex = 4;
             cbFileFilter.SelectedIndexChanged += CbFileFilter_SelectedIndexChanged;
             // 
@@ -324,36 +382,55 @@ namespace Weilai.Forms
             cbHiddenZero.AutoSize = true;
             cbHiddenZero.Checked = true;
             cbHiddenZero.CheckState = CheckState.Checked;
-            cbHiddenZero.Location = new Point(460, 215);
+            cbHiddenZero.Location = new Point(670, 217);
             cbHiddenZero.Name = "cbHiddenZero";
-            cbHiddenZero.Size = new Size(92, 21);
+            cbHiddenZero.Size = new Size(108, 21);
             cbHiddenZero.TabIndex = 5;
-            cbHiddenZero.Text = "隐藏\"0\"项目";
+            cbHiddenZero.Text = "&H. 隐藏\"0\"项目";
             cbHiddenZero.UseVisualStyleBackColor = true;
             cbHiddenZero.CheckedChanged += CbHiddenZero_CheckedChanged;
+            // 
+            // btnSelectFolder
+            // 
+            btnSelectFolder.Location = new Point(12, 46);
+            btnSelectFolder.Name = "btnSelectFolder";
+            btnSelectFolder.Size = new Size(113, 28);
+            btnSelectFolder.TabIndex = 0;
+            btnSelectFolder.Text = "&F. 选择文件夹";
+            btnSelectFolder.UseVisualStyleBackColor = true;
+            btnSelectFolder.Click += BtnSelectFolder_Click;
+            // 
+            // lvDialog4
+            // 
+            lvDialog4.Text = "表情";
             // 
             // FrmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(683, 597);
+            ClientSize = new Size(790, 597);
             Controls.Add(cbHiddenZero);
             Controls.Add(label2);
             Controls.Add(cbFileFilter);
             Controls.Add(pbProcess);
             Controls.Add(btnParse);
-            Controls.Add(btnExport);
-            Controls.Add(tabControl1);
+            Controls.Add(tcMain);
             Controls.Add(btnClearFileList);
             Controls.Add(label1);
+            Controls.Add(btnSelectFolder);
             Controls.Add(btnSelectFile);
             Controls.Add(lvFiles);
             Name = "FrmMain";
             Text = "FrmMain";
-            tabControl1.ResumeLayout(false);
-            tabPage1.ResumeLayout(false);
-            tabPage2.ResumeLayout(false);
-            tabPage3.ResumeLayout(false);
+            FormClosing += FrmMain_FormClosing;
+            Load += FrmMain_Load;
+            tcMain.ResumeLayout(false);
+            tcMainTp1.ResumeLayout(false);
+            tcMainTp2.ResumeLayout(false);
+            tcMainTp3.ResumeLayout(false);
+            tcMainTp4.ResumeLayout(false);
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -365,9 +442,9 @@ namespace Weilai.Forms
         private Button btnSelectFile;
         private Label label1;
         private Button btnClearFileList;
-        private TabControl tabControl1;
-        private TabPage tabPage1;
-        private TabPage tabPage2;
+        private TabControl tcMain;
+        private TabPage tcMainTp1;
+        private TabPage tcMainTp2;
         private Button btnExport;
         private Button btnParse;
         private ProgressBar pbProcess;
@@ -376,11 +453,7 @@ namespace Weilai.Forms
         private ColumnHeader lvCharacterCh2;
         private ColumnHeader lvCharacterCh3;
         private ColumnHeader lvCharacterCh4;
-        private TabPage tabPage3;
-        private ColumnHeader columnHeader7;
-        private ColumnHeader columnHeader8;
-        private ColumnHeader columnHeader5;
-        private ColumnHeader columnHeader6;
+        private TabPage tcMainTp3;
         private ColumnHeader lvDialog3;
         private ColumnHeader columnHeader4;
         private ColumnHeader lvAssetCh3;
@@ -395,7 +468,14 @@ namespace Weilai.Forms
         private ListView lvDialog;
         private ColumnHeader lvDialog1;
         private ColumnHeader lvDialog2;
-        private ColumnHeader lvDialog4;
         private ColumnHeader lvDialog5;
+        private ColumnHeader lvDialog6;
+        private TabPage tcMainTp4;
+        private Button btnSelectFolder;
+        private GroupBox groupBox1;
+        private Button btnExportFolder;
+        private TextBox txtExportFolder;
+        private ColumnHeader lvDialog7;
+        private ColumnHeader lvDialog4;
     }
 }

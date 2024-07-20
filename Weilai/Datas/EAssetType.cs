@@ -1,5 +1,8 @@
 namespace Weilai.Datas;
 
+/// <summary>
+/// 资源类型
+/// </summary>
 public enum EAssetType : byte
 {
     None = 0,
@@ -24,6 +27,16 @@ public enum EAssetType : byte
     /// 配音
     /// </summary>
     Voice,
+    /// <summary>
+    /// 表情
+    /// </summary>
+    Emoji,
+    /// <summary>
+    /// 其他
+    /// </summary>
     Other,
+    /// <summary>
+    /// 未识别
+    /// </summary>
     Unknown,
 }
