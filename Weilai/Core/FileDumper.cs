@@ -112,7 +112,7 @@ public static class FileDumper
 
     private readonly static string[] AssetTitle = ["Id", "类型", "关键字", "引用次数"];
 
-    public static string? ExportAssets(string folderPath, ISourceList<FileInfoData> fileSource, ISourceList<AssetData> assetSource)
+    public static string? ExportAssets(string folderPath, ISourceList<FileInfoData> fileSource, ISourceList<AssetData> assetSource, ISourceList<string> exportFileSource)
     {
         using var memoryStream = new MemoryStream();
         using var document = SpreadsheetDocument.Create(memoryStream, SpreadsheetDocumentType.Workbook);
@@ -198,12 +198,13 @@ public static class FileDumper
         document.Dispose();
 
         var filePath = SaveStreamToFile(memoryStream, "资源统计", folderPath);
+        exportFileSource.Edit(list => list.Add(filePath ?? "导出失败"));
         return filePath;
     }
 
     private readonly static string[] CharacterSummaryTitle = ["Id", "角色名称", "代号", "对话字数", "对话字数(不含标点)", "对话句数", "对话句数(不含标点)"];
 
-    public static string? ExportCharacterSummary(string folderPath, ISourceList<FileInfoData> fileSource, ISourceList<CharacterData> characterSource, ISourceList<AssetData> assetSource)
+    public static string? ExportCharacterSummary(string folderPath, ISourceList<FileInfoData> fileSource, ISourceList<CharacterData> characterSource, ISourceList<AssetData> assetSource, ISourceList<string> exportFileSource)
     {
         using var memoryStream = new MemoryStream();
         using var document = SpreadsheetDocument.Create(memoryStream, SpreadsheetDocumentType.Workbook);
@@ -307,12 +308,13 @@ public static class FileDumper
         document.Dispose();
 
         var filePath = SaveStreamToFile(memoryStream, "角色统计", folderPath);
+        exportFileSource.Edit(list => list.Add(filePath ?? "导出失败"));
         return filePath;
     }
 
     private readonly static string[] CharacterTitle = ["Id", "角色名称", "代号", "行号", "表情", "对话文本", "对话文本(不含标点)", "字数", "字数(不含标点)"];
 
-    public static string? ExportCharacter(string folderPath, string fileName, ISourceList<CharacterData> characterSource, ISourceList<AssetData> assetSource)
+    public static string? ExportCharacter(string folderPath, string fileName, ISourceList<CharacterData> characterSource, ISourceList<AssetData> assetSource, ISourceList<string> exportFileSource)
     {
         using var memoryStream = new MemoryStream();
         using var document = SpreadsheetDocument.Create(memoryStream, SpreadsheetDocumentType.Workbook);
@@ -381,6 +383,7 @@ public static class FileDumper
 
         var name = Path.GetFileNameWithoutExtension(fileName);
         var filePath = SaveStreamToFile(memoryStream, string.Format("角色对话_{0}", name), folderPath);
+        exportFileSource.Edit(list => list.Add(filePath ?? "导出失败"));
         return filePath;
     }
 }

@@ -33,6 +33,7 @@ public partial class FrmMain : Form
         context.FileList.Connect().Subscribe(OnFileListChange);
         context.CharacterList.Connect().Subscribe(OnCharacterListChange);
         context.AssetList.Connect().Subscribe(OnAssetListChange);
+        context.ExportFileList.Connect().Subscribe(OnExportFileListChange);
 
         pbProcess.DataBindings.Add(nameof(pbProcess.Value), context, nameof(context.ProgressValue));
         pbProcess.DataBindings.Add(nameof(pbProcess.Maximum), context, nameof(context.ProgressMax));
@@ -73,6 +74,18 @@ public partial class FrmMain : Form
         cbFileFilter.SelectedIndex = Math.Max(Math.Min(oldSelector, cbFileFilter.Items.Count - 1), 0);
 
         context.ProgressMax = context.FileList.Count;
+    }
+
+    private void OnExportFileListChange(IChangeSet<string> e)
+    {
+        lvExportFile.BeginUpdate();
+        lvExportFile.Items.Clear();
+        foreach (var str in context.ExportFileList.Items)
+        {
+            var item = new ListViewItem(str);
+            lvExportFile.Items.Add(item);
+        }
+        lvExportFile.EndUpdate();
     }
 
     private void OnCharacterListChange(IChangeSet<CharacterData> e)
@@ -310,15 +323,18 @@ public partial class FrmMain : Form
         var fileList = context.FileList;
         var characterList = context.CharacterList;
         var assetList = context.AssetList;
+        var exportFileList = context.ExportFileList;
 
         try
         {
-            FileDumper.ExportAssets(filePath, fileList, assetList);
-            FileDumper.ExportCharacterSummary(filePath, fileList, characterList, assetList);
+            exportFileList.Clear();
+
+            FileDumper.ExportAssets(filePath, fileList, assetList, exportFileList);
+            FileDumper.ExportCharacterSummary(filePath, fileList, characterList, assetList, exportFileList);
 
             foreach (var fileInfo in fileList.Items)
             {
-                FileDumper.ExportCharacter(filePath, fileInfo.Name, characterList, assetList);
+                FileDumper.ExportCharacter(filePath, fileInfo.Name, characterList, assetList, exportFileList);
             }
         }
         catch (Exception ex)
@@ -468,6 +484,11 @@ public partial class FrmMain : Form
         config.HiddenZero = context.HiddenZero;
 
         config.Save();
+
+        context.FileList.Dispose();
+        context.AssetList.Dispose();
+        context.CharacterList.Dispose();
+        context.ExportFileList.Dispose();
     }
 
     private void FrmMain_DragEnter(object sender, DragEventArgs e)

@@ -58,6 +58,9 @@ namespace Weilai.Forms
             lvAssetCh2 = new ColumnHeader();
             lvAssetCh3 = new ColumnHeader();
             tcMainTp4 = new TabPage();
+            groupBox2 = new GroupBox();
+            lvExportFile = new ListView();
+            lvExportFIleCh1 = new ColumnHeader();
             groupBox1 = new GroupBox();
             btnExportFolder = new Button();
             txtExportFolder = new TextBox();
@@ -73,6 +76,7 @@ namespace Weilai.Forms
             tcMainTp2.SuspendLayout();
             tcMainTp3.SuspendLayout();
             tcMainTp4.SuspendLayout();
+            groupBox2.SuspendLayout();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
@@ -287,6 +291,7 @@ namespace Weilai.Forms
             // 
             // tcMainTp4
             // 
+            tcMainTp4.Controls.Add(groupBox2);
             tcMainTp4.Controls.Add(groupBox1);
             tcMainTp4.Controls.Add(btnExport);
             tcMainTp4.Location = new Point(4, 26);
@@ -296,6 +301,33 @@ namespace Weilai.Forms
             tcMainTp4.TabIndex = 3;
             tcMainTp4.Text = "导出";
             tcMainTp4.UseVisualStyleBackColor = true;
+            // 
+            // groupBox2
+            // 
+            groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox2.Controls.Add(lvExportFile);
+            groupBox2.Location = new Point(24, 122);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(636, 183);
+            groupBox2.TabIndex = 11;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "导出文件列表";
+            // 
+            // lvExportFile
+            // 
+            lvExportFile.Columns.AddRange(new ColumnHeader[] { lvExportFIleCh1 });
+            lvExportFile.Dock = DockStyle.Fill;
+            lvExportFile.Location = new Point(3, 19);
+            lvExportFile.Name = "lvExportFile";
+            lvExportFile.Size = new Size(630, 161);
+            lvExportFile.TabIndex = 12;
+            lvExportFile.UseCompatibleStateImageBehavior = false;
+            lvExportFile.View = View.Details;
+            // 
+            // lvExportFIleCh1
+            // 
+            lvExportFIleCh1.Text = "文件路径";
+            lvExportFIleCh1.Width = 500;
             // 
             // groupBox1
             // 
@@ -331,11 +363,11 @@ namespace Weilai.Forms
             // btnExport
             // 
             btnExport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnExport.Location = new Point(528, 97);
+            btnExport.Location = new Point(528, 84);
             btnExport.Name = "btnExport";
             btnExport.Size = new Size(132, 32);
             btnExport.TabIndex = 6;
-            btnExport.Text = "&E. 导出结果";
+            btnExport.Text = "&E. 导出表格";
             btnExport.UseVisualStyleBackColor = true;
             btnExport.Click += BtnExport_Click;
             // 
@@ -429,6 +461,7 @@ namespace Weilai.Forms
             tcMainTp2.ResumeLayout(false);
             tcMainTp3.ResumeLayout(false);
             tcMainTp4.ResumeLayout(false);
+            groupBox2.ResumeLayout(false);
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ResumeLayout(false);
@@ -477,5 +510,9 @@ namespace Weilai.Forms
         private TextBox txtExportFolder;
         private ColumnHeader lvDialog7;
         private ColumnHeader lvDialog4;
+        private GroupBox groupBox2;
+        private ListView lvExportFile;
+        private ColumnHeader columnHeader1;
+        private ColumnHeader lvExportFIleCh1;
     }
 }
